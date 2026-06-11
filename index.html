@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Convite Animado</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+
+<style>
+
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body{
+background:#000;
+overflow:hidden;
+font-family:allura;
+}
+
+/* ================= INTRO ================= */
+#intro{
+position:fixed;
+inset:0;
+display:flex;
+justify-content:center;
+align-items:center;
+flex-direction:column;
+}
+
+canvas{
+position:absolute;
+inset:0;
+width:100%;
+height:100%;
+}
+
+.introTitle{
+position:absolute;
+top:25%;
+text-align:center;
+color:#d4af37;
+font-size:22px;
+text-shadow:0 0 20px gold;
+opacity:0;
+animation:fadeIn 2s forwards;
+animation-delay:3s;
+}
+
+.introBtn{
+position:absolute;
+top:55%;
+padding:16px 35px;
+border:2px solid #d4af37;
+background:transparent;
+color:#d4af37;
+border-radius:40px;
+cursor:pointer;
+animation:bounce 2s infinite;
+opacity:0;
+animation:fadeIn 2s forwards;
+animation-delay:5s;
+}
+
+/* ================= CONVITE ================= */
+#convite{
+display:none;
+position:relative;
+min-height:100vh;
+justify-content:center;
+align-items:center;
+}
+
+body.show-invite #intro{display:none;}
+body.show-invite #convite{display:flex;}
+
+.conviteBox{
+position:relative;
+max-width:900px;
+animation:float 4s infinite ease-in-out;
+}
+
+.conviteBox img{
+width:100%;
+filter:drop-shadow(0 0 25px rgba(255,215,0,0.25));
+}
+
+/* botões invisíveis */
+.btn{
+position:absolute;
+border-radius:20px;
+animation:bounce 2s infinite;
+}
+.btn{
+background:rgba(255,0,0,0.3); /* vermelho transparente */
+border:2px solid yellow;
+}
+
+.whatsapp{left:22%;top:77%;width:26%;height:7%;}
+.localizacao{left:51%;top:77%;width:26%;height:7%;}
+
+/* estrelas */
+.star{
+position:absolute;
+width:8px;height:8px;
+background:gold;
+border-radius:50%;
+animation:twinkle 2s infinite alternate;
+}
+
+/* balões */
+.balloon{
+position:absolute;
+width:10px;height:10px;
+background:gold;
+border-radius:50%;
+bottom:-20px;
+animation:rise 6s linear infinite;
+opacity:0.5;
+}
+
+/* ANIMAÇÕES */
+@keyframes fadeIn{to{opacity:1;}}
+@keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+@keyframes twinkle{0%{transform:scale(0.5);opacity:0.2;}100%{transform:scale(1.2);opacity:1;}}
+@keyframes rise{0%{transform:translateY(0);}100%{transform:translateY(-120vh);}}
+
+</style>
+</head>
+
+<body>
+
+<!-- ================= INTRO ================= -->
+<div id="intro">
+
+<canvas id="fireworks"></canvas>
+
+<div class="introTitle">
+Happy birthday to<br>
+Marinela Zacarias!
+</span>
+</div>
+
+<button class="introBtn" onclick="mostrarConvite()">
+CLIQUE AQUI
+</button>
+
+</div>
+
+<!-- ================= CONVITE ================= -->
+<div id="convite">
+
+<div class="conviteBox">
+
+<img src="convite.jpg">
+
+<a class="btn whatsapp"
+href="https://wa.me/244930703565?text=Olá! Confirmo minha presença."
+target="_blank"></a>
+
+<a class="btn localizacao"
+href="https://maps.app.goo.gl/XDR8BcZ8C2LTCj4e9"
+target="_blank"></a>
+
+</div>
+
+</div>
+
+<!-- ================= ÁUDIO ================= -->
+<audio id="musica" loop>
+<source src="musica.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+
+/* ===== TROCAR TELA ===== */
+function mostrarConvite(){
+document.body.classList.add("show-invite");
+document.getElementById("musica").play();
+criarEfeitos();
+}
+
+/* ===== FIREWORKS (SIMPLES) ===== */
+const canvas=document.getElementById("fireworks");
+const ctx=canvas.getContext("2d");
+
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+let rockets=[], particles=[];
+
+class Rocket{
+constructor(){
+this.x=Math.random()*canvas.width;
+this.y=canvas.height;
+this.speed=6+Math.random()*3;
+this.exploded=false;
+}
+
+update(){
+this.y-=this.speed;
+
+if(this.y<canvas.height*0.4 && !this.exploded){
+this.exploded=true;
+
+for(let i=0;i<60;i++){
+particles.push({
+x:this.x,
+y:this.y,
+dx:(Math.random()-0.5)*6,
+dy:(Math.random()-0.5)*6,
+life:80
+});
+}
+}
+}
+
+draw(){
+ctx.beginPath();
+ctx.arc(this.x,this.y,3,0,Math.PI*2);
+ctx.fillStyle="gold";
+ctx.fill();
+}
+}
+
+function loop(){
+requestAnimationFrame(loop);
+
+ctx.fillStyle="rgba(0,0,0,0.15)";
+ctx.fillRect(0,0,canvas.width,canvas.height);
+
+rockets.forEach((r,i)=>{
+r.update(); r.draw();
+if(r.exploded) rockets.splice(i,1);
+});
+
+particles.forEach((p,i)=>{
+p.x+=p.dx;
+p.y+=p.dy;
+p.life--;
+
+ctx.beginPath();
+ctx.arc(p.x,p.y,2,0,Math.PI*2);
+ctx.fillStyle="gold";
+ctx.fill();
+
+if(p.life<=0) particles.splice(i,1);
+});
+}
+
+setInterval(()=>rockets.push(new Rocket()),800);
+loop();
+
+/* ===== EFEITOS DO CONVITE ===== */
+function criarEfeitos(){
+
+for(let i=0;i<15;i++){
+let s=document.createElement("div");
+s.className="star";
+s.style.top=Math.random()*30+"%";
+s.style.left=(70+Math.random()*25)+"%";
+document.body.appendChild(s);
+}
+
+for(let i=0;i<12;i++){
+let b=document.createElement("div");
+b.className="balloon";
+b.style.left=Math.random()*100+"vw";
+document.body.appendChild(b);
+}
+
+}
+
+</script>
+
+</body>
+</html>
